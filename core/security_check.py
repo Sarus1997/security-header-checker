@@ -30,36 +30,36 @@ def check_security_web(url):
         for header in required_headers:
             if header in headers:
                 if header in ["Server", "X-Powered-By"]:
-                    sensitive_info.append(f"\u26A0\ufe0f {header}: Found → Consider hiding")
+                    sensitive_info.append(f"⚠️ {header}: Found → {headers.get(header)} → Consider hiding")
                 else:
-                    found_headers.append(f"\u2705 {header}: Found")
+                    found_headers.append(f"✅ {header}: Found")
             else:
                 if header in ["Server", "X-Powered-By"]:
-                    found_headers.append(f"\u2705 {header}: Not Found → Good")
+                    found_headers.append(f"✅ {header}: Not Found → Good")
                 else:
-                    missing_headers.append(f"\u274C {header}: Not Found")
+                    missing_headers.append(f"❌ {header}: Not Found")
 
         cookie_results = []
         cookies = headers.get("Set-Cookie", "")
         if cookies:
-            cookie_results.append(f"Secure: {'\u2705' if 'Secure' in cookies else '\u274C'}")
-            cookie_results.append(f"HttpOnly: {'\u2705' if 'HttpOnly' in cookies else '\u274C'}")
-            cookie_results.append(f"SameSite: {'\u2705' if 'SameSite' in cookies else '\u274C'}")
+            cookie_results.append(f"Secure: {'✅' if 'Secure' in cookies else '❌'}")
+            cookie_results.append(f"HttpOnly: {'✅' if 'HttpOnly' in cookies else '❌'}")
+            cookie_results.append(f"SameSite: {'✅' if 'SameSite' in cookies else '❌'}")
         else:
-            cookie_results.append("\u274C Set-Cookie: Not Found")
+            cookie_results.append("❌ Set-Cookie: Not Found")
 
         risks = []
         if "Content-Security-Policy" not in headers:
-            risks.append("\U0001F6A8 Missing CSP → Risk of XSS")
+            risks.append("🔴 Missing CSP → Risk of XSS")
         if "Strict-Transport-Security" not in headers:
-            risks.append("\U0001F6A8 Missing HSTS → Risk of HTTPS downgrade")
+            risks.append("🔴 Missing HSTS → Risk of HTTPS downgrade")
         if "Server" in headers:
-            risks.append("\U0001F6A8 Server info exposed")
+            risks.append("🔴 Server info exposed → Could allow targeted attacks")
         if "X-Powered-By" in headers:
-            risks.append("\U0001F6A8 X-Powered-By exposed")
+            risks.append("🔴 X-Powered-By exposed → Can reveal backend technology")
 
         result.extend([
-            ("Security Headers (Found)", found_headers),
+            ("Security Headers (Found)", found_headers + sensitive_info),
             ("Security Headers (Missing)", missing_headers),
             ("Cookies", cookie_results),
             ("Risks", risks)
